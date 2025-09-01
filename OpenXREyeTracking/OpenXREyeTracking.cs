@@ -9,7 +9,7 @@ using Silk.NET.OpenXR;
 
 namespace OpenXREyeTracking;
 public class OpenXREyeTracking : ResoniteMod {
-	internal const string VERSION_CONSTANT = "1.0.0";
+	internal const string VERSION_CONSTANT = "1.0.1";
 	public override string Name => "OpenXREyeTracking";
 	public override string Author => "headassbtw";
 	public override string Version => VERSION_CONSTANT;
@@ -33,7 +33,6 @@ public class OpenXREyeTracking : ResoniteMod {
 	private class OpenXRInterface : IInputDriver {
 		private Eyes _eyes;
 		private OpenXRInstance _instance;
-		private const float DefaultPupilSize = 0.0035f;
 		
 		public int UpdateOrder => 100;
 
@@ -51,7 +50,7 @@ public class OpenXREyeTracking : ResoniteMod {
 		}
 		
 		public void RegisterInputs(InputInterface inputInterface) {
-			_eyes = new Eyes(inputInterface, "OpenXR Eye Tracking", _instance.GazeSupported);
+			_eyes = new Eyes(inputInterface, "OpenXR Eye Tracking", false);
 			UniLog.Log($"OpenXR eye tracking registered (using {_instance.SystemName})");
 		}
 
@@ -77,7 +76,6 @@ public class OpenXREyeTracking : ResoniteMod {
 			if (eyeInfo.Valid) {
 				eye.UpdateWithDirection(eyeInfo.Direction);
 				eye.RawPosition = eyeInfo.Origin;
-				eye.PupilDiameter = eyeInfo.PupilDiameter != 0f ? eyeInfo.PupilDiameter : DefaultPupilSize;
 				eye.Openness = eyeInfo.Openness;
 			}
 		}

@@ -143,17 +143,15 @@ public class EyeGazeInteraction : IExtensionConsumer {
         leftEye = new IExtensionConsumer.EyeInfo {
             Origin = pos,
             Direction = quat.EulerAngles,
-            Openness = quat.w,
-            PupilDiameter = pos.y,
-            Valid = (eyeLoc.LocationFlags & (SpaceLocationFlags.PositionValidBit | SpaceLocationFlags.OrientationValidBit)) != 0,
+            Openness = 1.0f,
+            Valid = eyeLoc.LocationFlags.HasFlag(SpaceLocationFlags.PositionValidBit) && eyeLoc.LocationFlags.HasFlag(SpaceLocationFlags.OrientationValidBit),
         };
         
         rightEye = new IExtensionConsumer.EyeInfo {
             Origin = pos,
             Direction = quat.EulerAngles,
-            Openness = quat.w,
-            PupilDiameter = pos.y,
-            Valid = (eyeLoc.LocationFlags & (SpaceLocationFlags.PositionValidBit | SpaceLocationFlags.OrientationValidBit)) != 0,
+            Openness = 1.0f,
+            Valid = eyeLoc.LocationFlags.HasFlag(SpaceLocationFlags.PositionValidBit) && eyeLoc.LocationFlags.HasFlag(SpaceLocationFlags.OrientationValidBit),
         };
     }
 

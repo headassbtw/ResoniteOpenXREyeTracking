@@ -10,7 +10,6 @@ public interface IExtensionConsumer {
         public float3 Direction;
         public float3 Origin;
         public float Openness;
-        public float PupilDiameter;
         public bool Valid;
     }
     public unsafe void Initialize(XR oxr, Instance instance, Session session);
