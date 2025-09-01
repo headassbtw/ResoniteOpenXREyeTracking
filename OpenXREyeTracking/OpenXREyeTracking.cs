@@ -9,14 +9,14 @@ using Silk.NET.OpenXR;
 
 namespace OpenXREyeTracking;
 public class OpenXREyeTracking : ResoniteMod {
-	internal const string VERSION_CONSTANT = "1.0.1";
+	internal const string VERSION_CONSTANT = "1.0.2";
 	public override string Name => "OpenXREyeTracking";
 	public override string Author => "headassbtw";
 	public override string Version => VERSION_CONSTANT;
 	public override string Link => "https://github.com/headassbtw/ResoniteOpenXREyeTracking/";
 
 	public override void OnEngineInit() {
-		Harmony harmony = new Harmony("com.headassbtw.OpenXREyeTracking");
+		Harmony harmony = new Harmony("net.headassbtw.OpenXREyeTracking");
 		harmony.PatchAll();
 		Engine engine = Engine.Current;
 		engine.RunPostInit(() => {
