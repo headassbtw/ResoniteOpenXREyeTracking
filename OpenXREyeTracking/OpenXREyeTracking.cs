@@ -16,7 +16,7 @@ public class OpenXREyeTracking : ResoniteMod {
 	public override string Link => "https://github.com/headassbtw/ResoniteOpenXREyeTracking/";
 
 	public override void OnEngineInit() {
-		Harmony harmony = new Harmony("com.headassbtw.OpenXREyeTracking");
+		Harmony harmony = new Harmony("net.headassbtw.OpenXREyeTracking");
 		harmony.PatchAll();
 		Engine engine = Engine.Current;
 		engine.RunPostInit(() => {
