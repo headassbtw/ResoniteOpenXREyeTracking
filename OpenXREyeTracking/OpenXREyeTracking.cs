@@ -1,15 +1,13 @@
 using System;
 using Elements.Core;
 using FrooxEngine;
-using Renderite.Shared;
 using HarmonyLib;
 using OpenXREyeTracking.Extensions;
 using ResoniteModLoader;
-using Silk.NET.OpenXR;
 
 namespace OpenXREyeTracking;
 public class OpenXREyeTracking : ResoniteMod {
-	internal const string VERSION_CONSTANT = "1.0.2";
+	internal const string VERSION_CONSTANT = "1.0.3";
 	public override string Name => "OpenXREyeTracking";
 	public override string Author => "headassbtw";
 	public override string Version => VERSION_CONSTANT;
@@ -24,8 +22,8 @@ public class OpenXREyeTracking : ResoniteMod {
 				engine.InputInterface.RegisterInputDriver(new OpenXRInterface());
 			}
 			catch (Exception e) {
-				Msg("Failed to initialize OpenXREyeTracking");
-				Msg(e);
+				Error("Failed to initialize OpenXREyeTracking");
+				Error(e);
 			}
 		});
 	}
@@ -44,14 +42,13 @@ public class OpenXREyeTracking : ResoniteMod {
 			DataTreeDictionary dict = new();
 			dict.Add("Name", "OpenXR Eye Tracking");
 			dict.Add("Type", "Eye Tracking");
-			// TODO: Init OpenXR first and use the HMD's model name
 			dict.Add("Model", _instance.SystemName); // Is this how this works??
 			list.Add(dict);
 		}
 		
 		public void RegisterInputs(InputInterface inputInterface) {
 			_eyes = new Eyes(inputInterface, "OpenXR Eye Tracking", false);
-			UniLog.Log($"OpenXR eye tracking registered (using {_instance.SystemName})");
+			Msg($"OpenXR eye tracking registered (using {_instance.SystemName})");
 		}
 
 		public void UpdateInputs(float deltaTime) {

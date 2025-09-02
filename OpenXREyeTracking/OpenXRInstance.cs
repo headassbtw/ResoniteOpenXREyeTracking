@@ -2,16 +2,12 @@ using System;
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
-using System.Text;
-using Elements.Core;
 using FrooxEngine;
 using OpenXREyeTracking.Extensions;
+using ResoniteModLoader;
 using Silk.NET.Core;
 using Silk.NET.Core.Native;
 using Silk.NET.OpenXR;
-using Silk.NET.OpenXR.Extensions.FB;
-using Action = Silk.NET.OpenXR.Action;
-using Result = Silk.NET.OpenXR.Result;
 using Session = Silk.NET.OpenXR.Session;
 
 namespace OpenXREyeTracking;
@@ -21,10 +17,7 @@ internal enum UsingExtension {
     Facebook
 }
 
-public delegate Result XrCreateDebugUtilsMessengerEXT(Instance instance, ref DebugUtilsMessengerCreateInfoEXT createInfo, ref DebugUtilsMessengerEXT messenger);
-
 public class OpenXRInstance {
-    private PtrFuncTyped<XrCreateDebugUtilsMessengerEXT> xrCreateDebugUtilsMessengerEXT;
     
     public readonly bool GazeSupported;
     public readonly string SystemName;
@@ -79,7 +72,7 @@ public class OpenXRInstance {
             "XR_EXT_debug_utils",
             "XR_KHR_convert_timespec_time"
         ];
-        UniLog.Log($"Using {extensions[1]} for OpenXR eye tracking");
+        ResoniteMod.Msg($"Using {extensions[1]} for OpenXR eye tracking");
         string[] layers = [
             "XR_APILAYER_LUNARG_core_validation"
         ];
@@ -105,15 +98,6 @@ public class OpenXRInstance {
         _instance = new();
         oxr.CreateInstance(in inf, ref _instance).EnsureSuccess();
         Clock.Init(oxr, _instance);
-        xrCreateDebugUtilsMessengerEXT = XRPfnHelpers.GetXRFunction<XrCreateDebugUtilsMessengerEXT>(oxr, _instance, nameof(xrCreateDebugUtilsMessengerEXT));
-
-        DebugUtilsMessengerCreateInfoEXT debugCreateInfo = new() {
-            Type = StructureType.DebugUtilsMessengerCreateInfoExt,
-            Next = null,
-            MessageSeverities = DebugUtilsMessageSeverityFlagsEXT.ErrorBitExt | DebugUtilsMessageSeverityFlagsEXT.WarningBitExt | DebugUtilsMessageSeverityFlagsEXT.InfoBitExt,
-            MessageTypes = DebugUtilsMessageTypeFlagsEXT.ValidationBitExt | DebugUtilsMessageTypeFlagsEXT.PerformanceBitExt,
-            
-        };
         
         InstanceProperties props = new();
         oxr.GetInstanceProperties(_instance, ref props);
@@ -178,51 +162,42 @@ public class OpenXRInstance {
         
     }
 
-
-    private long _lastTime;
     public unsafe void Update(double delta) {
-        
         while (oxr.PollEvent(_instance, out var eventData)) {
-            switch (eventData.Type) {
-                case StructureType.EventDataSessionStateChanged: {
-                    var sessionEvent = Unsafe.As<EventDataBuffer, EventDataSessionStateChanged>(ref eventData);
-                    switch (sessionEvent.State) {
-                        case SessionState.Unknown:
-                        case SessionState.Idle: {
-                            break;
-                        }
-                        case SessionState.Ready: {
-                            SessionBeginInfo beginInf = new() {
-                                Type = StructureType.SessionBeginInfo,
-                                PrimaryViewConfigurationType = ViewConfigurationType.PrimaryStereo
-                            };
-                            oxr.BeginSession(_session, beginInf).EnsureSuccess();
-                            SessionRunning = true;
-                            break;
-                        }
-                        case SessionState.Focused: {
-                            SessionRunning = true;
-                            break;
-                        }
-                        case SessionState.Synchronized:
-                        case SessionState.Visible: {
-                            break;
-                        }
-                        case SessionState.Stopping:
-                        case SessionState.LossPending: 
-                        case SessionState.Exiting: {
-                            SessionRunning = false;
-                            break;
-                        }
+            if (eventData.Type == StructureType.EventDataSessionStateChanged) {
+                var sessionEvent = Unsafe.As<EventDataBuffer, EventDataSessionStateChanged>(ref eventData);
+                switch (sessionEvent.State) {
+                    case SessionState.Unknown:
+                    case SessionState.Idle: {
+                        break;
                     }
-                    break;
+                    case SessionState.Ready: {
+                        SessionBeginInfo beginInf = new() {
+                            Type = StructureType.SessionBeginInfo,
+                            PrimaryViewConfigurationType = ViewConfigurationType.PrimaryStereo
+                        };
+                        oxr.BeginSession(_session, beginInf).EnsureSuccess();
+                        SessionRunning = true;
+                        break;
+                    }
+                    case SessionState.Focused: {
+                        SessionRunning = true;
+                        break;
+                    }
+                    case SessionState.Synchronized:
+                    case SessionState.Visible: {
+                        break;
+                    }
+                    case SessionState.Stopping:
+                    case SessionState.LossPending: 
+                    case SessionState.Exiting: {
+                        SessionRunning = false;
+                        break;
+                    }
                 }
-                default: {
-                    UniLog.Log($"OpenXR event: {eventData.Type}");
-                    break;
-                }
+                break;
             }
-        }
+        }   
 
         if (!SessionRunning) {
             return;
